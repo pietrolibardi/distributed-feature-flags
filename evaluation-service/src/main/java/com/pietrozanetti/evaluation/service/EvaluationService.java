@@ -28,7 +28,7 @@ public class EvaluationService {
 
         FlagResponse flag = flagClient.getFlag(flagName, authorization);
 
-        if (!flag.isEnabled()) {
+        if (flag == null || !flag.isEnabled()) {
             return false;
         }
 

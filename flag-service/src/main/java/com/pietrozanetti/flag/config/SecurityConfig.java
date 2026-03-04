@@ -28,6 +28,7 @@ public class SecurityConfig {
         http
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
+                    .requestMatchers("/internal/**").permitAll()
                     .anyRequest().authenticated()
             )
             .exceptionHandling(ex -> ex

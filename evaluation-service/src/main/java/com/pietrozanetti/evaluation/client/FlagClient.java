@@ -9,6 +9,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 @Component
@@ -38,17 +39,25 @@ public class FlagClient {
             headers.set("Authorization", authorization);
         }
         HttpEntity<Void> entity = new HttpEntity<>(headers);
-        ResponseEntity<FlagResponse> response = restTemplate.exchange(
-                flagServiceUrl + "/flags/" + name,
-                HttpMethod.GET,
-                entity,
-                FlagResponse.class
-        );
-        FlagResponse flag = response.getBody();
-
-        flagCache.put(name, flag);
-
-        return flag;
+        // Sem token: chamada server-to-server usa endpoint interno (não exige JWT)
+        String path = (authorization != null && !authorization.isBlank())
+                ? "/flags/" + name
+                : "/internal/flags/" + name;
+        try {
+            ResponseEntity<FlagResponse> response = restTemplate.exchange(
+                    flagServiceUrl + path,
+                    HttpMethod.GET,
+                    entity,
+                    FlagResponse.class
+            );
+            FlagResponse flag = response.getBody();
+            if (flag != null) {
+                flagCache.put(name, flag);
+            }
+            return flag;
+        } catch (HttpClientErrorException.NotFound e) {
+            return null; // flag não existe
+        }
     }
 
     public void invalidate(String name) {

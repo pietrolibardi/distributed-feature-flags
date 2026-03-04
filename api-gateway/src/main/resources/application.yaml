@@ -6,6 +6,9 @@ spring:
     name: api-gateway
   cloud:
     gateway:
+      # Encaminha Authorization para os serviços downstream (por padrão pode ser tratado como sensível)
+      proxy:
+        sensitive: []  # nenhum header sensível; Authorization é repassado
       server:
         webmvc:
           routes:
