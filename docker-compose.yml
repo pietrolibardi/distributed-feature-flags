@@ -27,10 +27,10 @@ services:
       - app-network
 
   auth-service:
-    build:
-      context: .
-      dockerfile: auth-service/Dockerfile
+    build: ./auth-service
     container_name: auth-service
+    ports:
+      - "8081:8081"
     depends_on:
       - postgres-auth
     environment:
@@ -40,9 +40,50 @@ services:
       DB_USER: auth_user
       DB_PASSWORD: auth_password
       JWT_SECRET: ${JWT_SECRET}
-      JWT_EXPIRATION: 3600000
+      JWT_EXPIRATION: ${JWT_EXPIRATION:-3600000}
+    networks:
+      - app-network
+
+  flag-service:
+    build: ./flag-service
+    container_name: flag-service
     ports:
-      - "8081:8081"
+      - "8082:8082"
+    depends_on:
+      - postgres-flag
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-flag:5432/flag_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRATION: ${JWT_EXPIRATION:-3600000}
+      EVALUATION_SERVICE_URL: http://evaluation-service:8083
+    networks:
+      - app-network
+
+  evaluation-service:
+    build: ./evaluation-service
+    container_name: evaluation-service
+    ports:
+      - "8083:8083"
+    depends_on:
+      - flag-service
+    environment:
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRATION: ${JWT_EXPIRATION:-3600000}
+      FLAG_SERVICE_URL: http://flag-service:8082
+    networks:
+      - app-network
+
+  api-gateway:
+    build: ./api-gateway
+    container_name: api-gateway
+    ports:
+      - "8080:8080"
+    depends_on:
+      - auth-service
+      - flag-service
+      - evaluation-service
     networks:
       - app-network
 
