@@ -128,6 +128,29 @@ docker-compose up --build
 
 ---
 
+## 🧪 Testar com Docker (smoke test)
+
+Para subir toda a stack em Docker e validar as funcionalidades (registro, login, flags e avaliação):
+
+1. **Configure as variáveis de ambiente** (obrigatório para o Docker Compose):
+   ```bash
+   cp .env.example .env
+   # Edite .env e defina JWT_SECRET (em produção use um valor seguro).
+   ```
+
+2. **Execute o script de smoke test:**
+   ```bash
+   ./scripts/smoke-test.sh
+   ```
+   O script faz o build Maven, sobe a stack com `docker-compose up --build -d`, aguarda os serviços e executa uma sequência de chamadas HTTP: registro de usuário, login, criação de flag, listagem, obtenção da flag e avaliação. Se algum passo falhar, o script exibe o erro e termina com código 1.
+
+3. **Encerrar os containers ao final do teste:**
+   ```bash
+   ./scripts/smoke-test.sh --down
+   ```
+
+---
+
 ## 🎯 Project Goals
 
 - Demonstrate solid software engineering fundamentals

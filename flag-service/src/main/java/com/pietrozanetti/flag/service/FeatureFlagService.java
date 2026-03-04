@@ -37,4 +37,13 @@ public class FeatureFlagService {
     public Optional<FeatureFlag> findByName(String name) {
         return repository.findByName(name);
     }
+
+    public boolean deleteByName(String name) {
+        return repository.findByName(name)
+                .map(flag -> {
+                    repository.delete(flag);
+                    return true;
+                })
+                .orElse(false);
+    }
 }

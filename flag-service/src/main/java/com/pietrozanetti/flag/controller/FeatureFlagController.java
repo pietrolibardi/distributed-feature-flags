@@ -31,4 +31,12 @@ public class FeatureFlagController {
         return service.findByName(name)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Flag not found: " + name));
     }
+
+    @DeleteMapping("/{name}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteByName(@PathVariable String name) {
+        if (!service.deleteByName(name)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Flag not found: " + name);
+        }
+    }
 }
