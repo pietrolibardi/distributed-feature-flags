@@ -21,6 +21,7 @@
     <modules>
         <module>security-lib</module>
         <module>auth-service</module>
+        <module>flag-service</module>
     </modules>
 
     <properties>
